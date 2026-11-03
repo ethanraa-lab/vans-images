@@ -24,3 +24,6 @@ First prove retrieval for 3–5 representative real product codes using an appro
 
 ## Development
 Keep the existing stack unless a feature requires a change. Do not add a framework for cosmetic edits alone. Keep company catalogs, exports, credentials, and local workspaces out of Git. Run `npm run check` and `npm test` after relevant changes. State any limits on browser or network testing.
+
+## Access model
+One shared team account, no self-registration. Protect workspace assets and all search APIs on the server. Login secrets belong in environment settings, never Git. Use salted password hashes and server-revocable sessions. Production requires HTTPS APP_ORIGIN. Browser-local workspaces are not shared between users.

@@ -6,9 +6,12 @@ function candidateMarkup(p,n){
 }
 async function lookup(p){
  busy++;p.status='Searching for product images…';render();
- try{const response=await fetch('/api/images?code='+encodeURIComponent(p.code));const data=await response.json();if(!response.ok)throw Error(data.error||'Search failed.');candidates.set(p.code,data.results);p.status=data.results.length?`${data.results.length} candidates found. Review and keep the correct images.`:'No image candidates found. Try image URLs or a manual search.';}
+ try{const response=await fetch('/api/images?code='+encodeURIComponent(p.code));const data=await response.json();if(response.status===401){location.replace('/login');return;}if(!response.ok)throw Error(data.error||'Search failed.');candidates.set(p.code,data.results);p.status=data.results.length?`${data.results.length} candidates found. Review and keep the correct images.`:'No image candidates found. Try image URLs or a manual search.';}
  catch(error){p.status=error.message||'Could not reach the search server.';}
  finally{busy--;render();}
 }
-async function configurationStatus(){try{const response=await fetch('/api/config');if(!response.ok)throw Error();configuration=await response.json();$('#searchconfig').textContent=configuration.imageSearchConfigured?'Image search is configured · Brave Search. Item codes are sent to Brave when you start a search.':'Image search needs setup: add BRAVE_SEARCH_API_KEY to your local .env file, then restart. Catalog image URLs, manual URLs and Excel export work without it.';}catch{$('#searchconfig').textContent='Cannot reach the local server. Start the app using npm start, then open http://localhost:3000.';}}
+async function configurationStatus(){try{const response=await fetch('/api/config');if(response.status===401){location.replace('/login');return;}if(!response.ok)throw Error();configuration=await response.json();$('#searchconfig').textContent=configuration.imageSearchConfigured?'Image search is configured · Brave Search. Item codes are sent to Brave when you start a search.':'Image search needs setup: add BRAVE_SEARCH_API_KEY to your local .env file, then restart. Catalog image URLs, manual URLs and Excel export work without it.';}catch{$('#searchconfig').textContent='Cannot reach the local server. Start the app using npm start, then open http://localhost:3000.';}}
 if(typeof fetch==='function')configurationStatus();
+
+$('#logout').onclick=async()=>{try{const response=await fetch('/api/logout',{method:'POST'});if(!response.ok)throw Error();location.replace('/login');}catch{say('Logout could not complete. Please try again.')}};
+window.addEventListener('pageshow',async()=>{try{const response=await fetch('/api/config');if(response.status===401)location.replace('/login');}catch{}});

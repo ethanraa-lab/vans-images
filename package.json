@@ -4,12 +4,15 @@
   "private": true,
   "description": "Bulk Vans product image curation and vertical Excel export",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
     "test": "node --test",
-    "check": "node --check lib/search.js && node --check server.js && node --check public/app.js"
+    "check": "node --check lib/auth.js && node --check scripts/hash-password.js && node --check lib/search.js && node --check server.js && node --check public/app.js",
+    "hash-password": "node scripts/hash-password.js"
   },
   "dependencies": {
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"

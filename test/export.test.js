@@ -6,6 +6,7 @@ function app() {
   const elements = {};
   const context = vm.createContext({
     document: { querySelector: key => elements[key] ||= { value: '', hidden: true } },
+    window: { addEventListener: () => {} },
     localStorage: { getItem: () => null, setItem: () => {} }, URL, setTimeout, clearTimeout,
   });
   vm.runInContext(readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), context);

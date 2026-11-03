@@ -13,12 +13,40 @@ npm install
 npm start
 ```
 
-Open **http://localhost:3000**. For development, use `npm run dev`.
+Configure the shared account below before opening **http://localhost:3000**. For development, use `npm run dev`.
 The private repository requires GitHub access through your normal Git authentication. Never paste tokens into project files.
 
-## Use with OpenCode
+## Develop through GitHub
 
-Open this cloned `vans-images` folder in OpenCode. It can read `AGENTS.md` for project requirements. Make changes here, run `npm run check` and `npm test`, then commit and push to this same repository.
+Use GitHub Codespaces or your preferred Git workflow. Project requirements are in `AGENTS.md`. Run `npm run check` and `npm test` before committing changes. Codespaces port forwarding requires APP_ORIGIN to match its exact forwarded HTTPS URL.
+
+## Shared team login
+
+There is one shared account and no public registration. The server fails closed: until both login settings are supplied, the workspace and search API remain inaccessible. No default credentials are shipped.
+
+1. Copy `.env.example` to `.env` (or configure the variables in your hosting service).
+2. Set `TEAM_USERNAME` to the shared username.
+3. Run `npm run hash-password` in a trusted terminal. Enter a password of at least 12 characters at the hidden prompt. Copy the resulting salted hash into `TEAM_PASSWORD_HASH`.
+4. Set `APP_ORIGIN` to the exact browser URL (local default: `http://localhost:3000`). Restart the server.
+5. Sign in at `/login`; use **Log out** when finished.
+
+Never commit the plaintext password, password hash, API key or `.env`. Share the password privately with your team. Do not put passwords in shell commands or chat.
+
+Passwords are verified with salted scrypt hashes. Opaque sessions use HttpOnly, SameSite=Strict cookies and expire after eight hours; production cookies also require HTTPS (Secure). Login attempts are rate limited. Logout revokes the current session on the server. Restarting the server or changing credentials revokes all sessions. Sessions and rate limits are in memory: deploy one instance for this initial version.
+
+Workspaces remain browser-local, including after logout. The shared account does not sync catalogs or image selections between colleagues, and it cannot identify who performed an action. JSON backups let you transfer work deliberately.
+
+## Deploy for team access
+
+The code is prepared for a Node.js 22+ hosting service; it has **not been deployed** from this repository. GitHub Pages cannot run this server. Keep the repository private while publishing the login-protected application.
+
+- Install: `npm ci`; start: `npm start`.
+- Set `NODE_ENV=production`, `HOST=0.0.0.0` and `APP_ORIGIN=https://your-actual-hostname`.
+- Set `TEAM_USERNAME`, `TEAM_PASSWORD_HASH` and `BRAVE_SEARCH_API_KEY` as hosting secrets.
+- Let the host supply `PORT`. Enable HTTPS at the hosting edge. No forwarded headers are trusted for origin validation.
+- Health-check path: `/health` (only returns a basic status).
+
+Without a configured shared account, deployment remains locked. Without a Brave key, login, URL import, image ordering and Excel export still work, while automatic search reports setup is needed.
 
 ## Current features
 
