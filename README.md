@@ -4,7 +4,7 @@ A local website for collecting Vans product images, choosing a hero view, arrang
 
 ## Run on your computer
 
-Install Node.js 20 or later and Git, then open a terminal:
+Install Node.js 22 or later and Git, then open a terminal:
 
 ```bash
 git clone https://github.com/ethanraa-lab/vans-images.git
@@ -33,13 +33,24 @@ Open this cloned `vans-images` folder in OpenCode. It can read `AGENTS.md` for p
 - Export `.xlsx` and preview its vertical rows.
 - Browser-local workspace persistence, with JSON backup and restore.
 
-## Important limitation: image discovery
+## Configure automatic image search
 
-**Reliable automatic web image search is not implemented.** The initial lookup only tries the standard Vans CDN HERO and ALT1–ALT8 URL pattern. Requests returned no usable images in the development browser. Image availability, naming, and access restrictions vary. A successful image load does not prove product/colour correctness: review all images.
+The server integrates the [Brave Image Search API](https://api-dashboard.search.brave.com/api-reference/images/image_search). You need your own key with image-search access. Check your provider plan and usage limits before using it.
 
-The Google Images button opens a manual search; it does not collect search results. Direct image URLs and catalog image columns are the supported fallback. PDF catalogs and embedded Excel pictures are not extracted.
+1. Copy `.env.example` to `.env` in this project folder.
+2. Set `BRAVE_SEARCH_API_KEY` in `.env` locally. Do not paste the key in chat or commit it.
+3. Restart `npm start`. The page will show that search is configured.
+4. Paste item codes or import a catalog. Search candidates appear below each product.
+5. Inspect each image and its source page; choose **Keep** for the correct views. Dismiss unwanted candidates.
+6. Reorder retained images and export.
 
-The next milestone is to integrate an approved product image feed or a documented image-search API using a server-side secret. Validate retrieval on a small set of real item codes before expanding to bulk searches. Do not bypass website access restrictions or substitute generated images.
+Only original image URLs are retained/exported; search thumbnails are not substituted. Code mentions are textual evidence only, not a guarantee that a product or colour is correct. Images must load successfully before they can be kept. Some sources may block direct image loading.
+
+API requests use a quoted item code, disabled spellchecking, and 30 candidates. Exact URLs are deduplicated. Searches use a bounded five-minute memory cache and a one-request-at-a-time throttle. Quota, invalid-key, missing-key and network failures have separate messages. A catalog containing image URLs imports those URLs without searching that product.
+
+**Verification status:** provider requests, result parsing, caching, failure handling and export behavior are covered by automated tests using mocked provider responses. Live Brave retrieval has not been verified because no API key is configured in the development environment. Validate 3–5 real product codes before relying on batch search.
+
+Without a key you can still import/paste image URLs, arrange images and export. The separate **Try Vans CDN pattern** button is best-effort; earlier tests returned no usable images. Manual Google Images opens a search page and does not collect its results. PDF catalogs and embedded Excel pictures are not extracted.
 
 ## Excel output
 
@@ -53,7 +64,7 @@ Example URLs above are illustrative. Every retained image becomes a row, with th
 
 ## Data and dependencies
 
-Catalogs are parsed in the browser and are not uploaded to this Node.js server. The workspace is stored in this browser on this origin. External image hosts receive requests when images are checked/displayed; manual Google searches contain the item code. Exported URLs remain dependent on their hosts.
+Catalogs are parsed in the browser. When searching, each item code is sent to the local server and Brave. Candidates stay in memory until refresh; retained images are saved in the browser workspace. The workspace is stored in this browser on this origin. External image hosts receive requests when images are checked/displayed; manual Google searches contain the item code. Exported URLs remain dependent on their hosts.
 
 SheetJS Community Edition 0.20.3 is installed from its official distribution URL and served locally as `/xlsx.js`. No runtime CDN script is required. This is an independent operations tool, not an official Vans application.
 
@@ -64,4 +75,4 @@ npm run check
 npm test
 ```
 
-Tests cover product-code deduplication, vertical export fields, hero reordering and position renumbering. Live image discovery requires separate verification with a usable image source.
+Tests cover product-code deduplication, vertical export fields, hero reordering and position renumbering. API request/parsing/cache/error behavior is tested with mocked responses. Live image discovery requires separate verification with your configured key.

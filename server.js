@@ -1,6 +1,8 @@
 import http from 'node:http';
+import { createImageSearch } from './lib/search.js';
+try { process.loadEnvFile(); } catch (e) { if (e.code !== 'ENOENT') throw e; }
+const searchImages = createImageSearch({apiKey:process.env.BRAVE_SEARCH_API_KEY});
 import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 const port = Number(process.env.PORT || 3000);
 const files = {
   '/': ['public/index.html', 'text/html; charset=utf-8'],
@@ -12,7 +14,20 @@ const server = http.createServer(async (req, res) => {
   if (!['GET', 'HEAD'].includes(req.method)) {
     res.writeHead(405, { Allow: 'GET, HEAD' }); res.end('Method not allowed'); return;
   }
+  if (!['localhost', '127.0.0.1'].includes((req.headers.host || '').split(':')[0])) { res.writeHead(403); res.end('Host not allowed'); return; }
   const path = new URL(req.url, 'http://localhost').pathname;
+  if (path === '/api/config' || path === '/api/images') {
+    const host = req.headers.host;
+    const origin = req.headers.origin;
+    if (origin && origin !== `http://${host}`) { res.writeHead(403); res.end('Origin not allowed'); return; }
+    if (req.headers['sec-fetch-site'] === 'cross-site') { res.writeHead(403); res.end('Origin not allowed'); return; }
+    const json = (status, value) => { res.writeHead(status, {'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}); res.end(req.method === 'HEAD' ? undefined : JSON.stringify(value)); };
+    if (path === '/api/config') { json(200, {imageSearchConfigured: Boolean(process.env.BRAVE_SEARCH_API_KEY)}); return; }
+    if (req.method !== 'GET') { json(405, {error:'Use GET for image search.'}); return; }
+    try { json(200, await searchImages(new URL(req.url, 'http://localhost').searchParams.get('code'))); }
+    catch (error) { json(error.status || 500, {error: error.status ? error.message : 'Image search failed.'}); }
+    return;
+  }
   const entry = files[path];
   if (!entry) { res.writeHead(404); res.end('Not found'); return; }
   try {

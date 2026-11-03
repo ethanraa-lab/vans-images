@@ -6,7 +6,8 @@ Build a practical website to find and curate Vans product images by item code, t
 ## Current implementation
 - Local Node.js server (`server.js`), vanilla HTML/CSS/JavaScript (`public/`).
 - SheetJS for Excel import/export, installed via the official distribution.
-- Existing CDN lookup is best-effort and failed in the development browser. Do not describe automatic image search as complete.
+- Brave image-search backend (`lib/search.js`, `/api/images`) and candidate review UI are implemented. API keys are server-side in `.env`.
+- Provider behavior is tested with mocked responses; live search remains unverified without a key. CDN pattern lookup is a separate best-effort fallback.
 
 ## Required behavior
 - Bulk item codes or Excel/CSV catalog input with column mapping.
