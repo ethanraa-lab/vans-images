@@ -6,3 +6,5 @@ uploads/
 exports/
 *.log
 .DS_Store
+
+pages-dist/
