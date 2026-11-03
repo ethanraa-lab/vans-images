@@ -5,7 +5,7 @@ import { createAuth } from './lib/auth.js';
 try { process.loadEnvFile(); } catch (e) { if (e.code !== 'ENOENT') throw e; }
 const production = process.env.NODE_ENV === 'production';
 const port = Number(process.env.PORT || 3000);
-const origin = new URL(process.env.APP_ORIGIN || `http://localhost:${port}`).origin;
+const origin = new URL(process.env.APP_ORIGIN || process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`).origin;
 if (production && !origin.startsWith('https://')) throw Error('Production requires an HTTPS APP_ORIGIN.');
 const auth = createAuth({username:process.env.TEAM_USERNAME, hash:process.env.TEAM_PASSWORD_HASH, secure:production});
 const searchImages = createImageSearch({apiKey:process.env.BRAVE_SEARCH_API_KEY});
