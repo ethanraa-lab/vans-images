@@ -12,7 +12,8 @@
     "dev": "node --watch server.js",
     "test": "node --test",
     "check": "node --check lib/auth.js && node --check scripts/hash-password.js && node --check lib/search.js && node --check server.js && node --check public/app.js",
-    "hash-password": "node scripts/hash-password.js"
+    "hash-password": "node scripts/hash-password.js",
+    "build:pages": "node scripts/build-pages.js"
   },
   "dependencies": {
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
