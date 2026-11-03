@@ -1,0 +1,22 @@
+import {mkdir,readFile,writeFile,copyFile} from 'node:fs/promises';
+const output=new URL('../pages-dist/',import.meta.url);
+await mkdir(output,{recursive:true});
+let html=await readFile(new URL('../public/index.html',import.meta.url),'utf8');
+let app=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
+html=html.replace('<button id="logout" style="margin-left:16px">Log out</button>','');
+html=html.replace('Add products + look up images','Add products');
+html=html.replace('Checking image search configuration…','GitHub Pages edition · No login. Automatic web image search is unavailable. Import catalog image URLs or add direct image URLs.');
+html=html.replace('Search returns candidate images for each code. Review the product and colour, then click Keep to add images to your export. Only your retained images are exported.','Your catalog and image selections stay in this browser. Review each product and colour before export. Google Images opens a manual search; the Vans CDN pattern is an optional best-effort lookup.');
+app=app.replace('<button data-action="lookup" data-p="${n}">⌕ Search images</button>','');
+app=app.replace("Try lookup or add direct image URLs.","Add direct image URLs, import them from a catalog, or open a manual Google Images search.");
+app=app.replace("say('Search finished. Review candidates under each product; click Keep for the images you want.')","say('Products added. Import or paste image URLs for each product.')");
+// Replace backend-only functions; there are no API calls or auth redirects in the Pages build.
+const start=app.indexOf('async function lookup(p){');
+if(start<0)throw Error('Cannot locate backend section; review Pages build script.');
+app=app.slice(0,start)+`async function lookup(p){p.status='Ready for image URLs. Automatic web search is unavailable in this GitHub Pages version.';render();}\n`;
+if(/fetch\(|location\.replace\(/.test(app))throw Error('Backend dependency unexpectedly remains.');
+await writeFile(new URL('index.html',output),html);
+await writeFile(new URL('app.js',output),app);
+await copyFile(new URL('../node_modules/xlsx/dist/xlsx.full.min.js',import.meta.url),new URL('xlsx.js',output));
+await writeFile(new URL('.nojekyll',output),'');
+console.log('Built pages-dist: browser-only app and local Excel library. No API keys, login code, or backend files included.');
