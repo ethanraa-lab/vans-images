@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: vans-images
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm ci && npm run check && npm test
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: HOST
+        value: 0.0.0.0
+      - key: TEAM_USERNAME
+        sync: false
+      - key: TEAM_PASSWORD_HASH
+        sync: false
+# BRAVE_SEARCH_API_KEY can be added privately in the service environment.
+# Without it, login, image-URL curation and export work; API search is unavailable.
+# APP_ORIGIN defaults to Render's RENDER_EXTERNAL_URL. Set APP_ORIGIN explicitly
+# if a custom domain is used. Never place real credentials in this file.
