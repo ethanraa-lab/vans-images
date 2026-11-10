@@ -12,6 +12,7 @@ html=html.replace('</style>',"body{background:#f3f0e9;color:#252520;font-family:
 html=html.replace(/<strong>VANS(?:\s*\/)?<\/strong>/,'<img class="brand-logo" src="vans-off-the-wall.svg" width="132" height="60" alt="Vans Off the Wall">');
 html=html.replace('</style>','.brand-logo{display:block;width:132px;height:60px;object-fit:contain;background:transparent;filter:invert(1);mix-blend-mode:screen;border-radius:0;flex-shrink:0}@media(max-width:480px){.brand-logo{width:110px;height:50px}header{gap:12px}header span{padding-left:12px;font-size:9px}}</style>');
 html=html.replace('</style>',"#import{background:#171717;color:#ffffff;border-color:#171717}#import:hover{background:#333333;color:#ffffff;border-color:#333333}#import:disabled{background:#171717;color:#ffffff}</style>");
+html=html.replace('</style>','@media (hover:hover) and (prefers-reduced-motion:no-preference){.brand-logo{transition:transform 220ms ease-out}.brand-logo:hover{transform:translateY(-3px) rotate(-7deg)}}</style>');
 html=html.replace('From item code to image-ready.','Every angle.<br>Ready for your storefront.');
 html=html.replace('Collect your product views. Put your best image first. Export in one go.','Discover official imagery. Curate your collection. Export in one go.');
 html=html.replace('<div id="products"></div>','<div class="region-strip" aria-label="Image regions"><span>US</span><span>EUROPE</span><span>UK</span><span>JAPAN</span></div><div id="products"></div>');
