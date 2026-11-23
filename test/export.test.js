@@ -7,7 +7,10 @@ function app() {
   const context = vm.createContext({
     document: { querySelector: key => elements[key] ||= { value: '', hidden: true } },
     window: { addEventListener: () => {} },
-    localStorage: { getItem: () => null, setItem: () => {} }, URL, setTimeout, clearTimeout,
+    localStorage: { getItem: () => null, setItem: () => {} },
+    sessionStorage: { getItem: () => null, setItem: () => {} },
+    location: { hash: '' },
+    URL, URLSearchParams, setTimeout, clearTimeout,
   });
   vm.runInContext(readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), context);
   return code => vm.runInContext(code, context);
