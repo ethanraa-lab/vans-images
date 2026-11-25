@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import XLSX from 'xlsx';
 import { readFileSync } from 'node:fs';
-function app() {
+function app(extra = {}) {
   const elements = {};
   const context = vm.createContext({
     document: { querySelector: key => elements[key] ||= { value: '', hidden: true } },
@@ -10,7 +11,7 @@ function app() {
     localStorage: { getItem: () => null, setItem: () => {} },
     sessionStorage: { getItem: () => null, setItem: () => {} },
     location: { hash: '' },
-    URL, URLSearchParams, setTimeout, clearTimeout,
+    URL, URLSearchParams, setTimeout, clearTimeout, ...extra,
   });
   vm.runInContext(readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'), context);
   return code => vm.runInContext(code, context);
@@ -33,4 +34,26 @@ test('hero reordering and removal recalculate export positions', () => {
   assert.equal(rows[0]['Image Alt Text'], 'VN000D3HY28- hero view');
   assert.equal(rows[1]['Image Position'], 2);
   assert.equal(rows[1]['Image Alt Text'], 'VN000D3HY28- Alt 1');
+});
+
+
+test('catalog upload reports missing Excel support next to upload status', async () => {
+  const run = app();
+  await run(`$('#file').onchange({target:{files:[{name:'catalog.xlsx'}],value:'catalog.xlsx'}})`);
+  assert.match(run("$('#status').textContent"), /Excel support did not load/);
+});
+test('Excel catalog imports Handle and Item Code after blank leading rows', async () => {
+  const run = app({XLSX});
+  await run(`(async()=>{
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([[],['Handle','Item Code'],['standard-handle','VN000DC4BA2']]),'Products');
+    const bytes=XLSX.write(wb,{type:'array',bookType:'xlsx'});
+    $('#mapping').showModal=()=>{};$('#mapping').close=()=>{};
+    await $('#file').onchange({target:{files:[{name:'catalog.xlsx',arrayBuffer:async()=>bytes}],value:'catalog.xlsx'}});
+  })()`);
+  assert.match(run("$('#status').textContent"), /Catalog opened/);
+  await run(`$('#codecol').value='1';$('#handlecol').value='0';$('#imagecol').value='';lookup=async()=>{};$('#import').onclick();`);
+  assert.equal(run('products[0].handle'),'standard-handle');
+  assert.equal(run('products[0].code'),'VN000DC4BA2');
+  assert.equal(run('busy'),0);
 });
